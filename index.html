@@ -24,12 +24,12 @@
       align-items: center;
       flex-wrap: nowrap;
       width: 100%;
-      overflow: hidden; /* Prevent horizontal scrolling */
+      overflow: hidden;
       padding: 20px;
       box-sizing: border-box;
     }
     .press-speed {
-      background-color: #fff;
+      background-color: var(--press-color, #fff);
       border-radius: 8px;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       margin: 0 10px;
@@ -40,10 +40,12 @@
       max-width: 250px;
       box-sizing: border-box;
       position: relative;
+      transition: background-color 0.5s;
     }
     .press-name {
       font-size: 1.5vw;
-      color: #555;
+      font-weight: bold;
+      color: #333;
       margin-bottom: 1vh;
       position: relative;
       z-index: 1;
@@ -58,16 +60,38 @@
       from { opacity: 0; }
       to { opacity: 1; }
     }
-    .fire-icon {
+    .fire-container {
       position: absolute;
-      top: -30px; /* Adjust as needed */
+      top: -30px;
       left: 50%;
       transform: translateX(-50%);
-      width: 50px; /* Adjust as needed */
-      height: 50px; /* Adjust as needed */
-      background: url('')';
-      background-size: contain;
-      display: none; /* Initially hide the fire icon */
+      display: none;
+    }
+    .flame {
+      animation: burnBabyBurn 0.4s linear infinite;
+      height: 1px;
+      transform: scale(5) translate(-13px, -15px);
+      width: 1px;
+    }
+    .glow {
+      background-color: #ffb778;
+      border-radius: 50%;
+      filter: blur(100px);
+      height: 280px;
+      opacity: 0.5;
+      width: 280px;
+    }
+    .flame, .glow {
+      bottom: 0;
+      left: 0;
+      margin: auto;
+      pointer-events: none;
+      position: absolute;
+      right: 0;
+      top: 0;
+    }
+    @keyframes burnBabyBurn {
+      /* (Insert your keyframe animation code here) */
     }
   </style>
 </head>
@@ -135,7 +159,10 @@
           pressDiv.innerHTML = `
             <div class="press-name" id="name-${pressId}">${pressData.name}</div>
             <div class="speed-value" id="speed-${pressId}">${pressData.speed}</div>
-            <div class="fire-icon" id="fire-${pressId}"></div>
+            <div class="fire-container" id="fire-${pressId}">
+              <div class="flame"></div>
+              <div class="glow"></div>
+            </div>
           `;
           dashboard.appendChild(pressDiv);
         }
@@ -153,15 +180,21 @@
         previousSpeeds[pressData.name] = pressData.speed;
 
         // Adjust fire animation based on speed
-        const fireElement = document.getElementById(`fire-${pressId}`);
+        const fireContainer = document.getElementById(`fire-${pressId}`);
+        const flame = fireContainer.querySelector('.flame');
+        const glow = fireContainer.querySelector('.glow');
         if (pressData.speed > 0) {
-          fireElement.style.display = 'block';
+          fireContainer.style.display = 'block';
           const scale = Math.min(1 + pressData.speed / 100, 2); // Limit max scale
-          fireElement.style.width = `${50 * scale}px`;
-          fireElement.style.height = `${50 * scale}px`;
+          flame.style.setProperty('transform', `scale(${scale}) translate(-13px, -15px)`);
+          glow.style.setProperty('opacity', scale * 0.1);
         } else {
-          fireElement.style.display = 'none';
+          fireContainer.style.display = 'none';
         }
+
+        // Update the background color based on speed
+        const color = getColorForSpeed(pressData.speed);
+        pressDiv.style.setProperty('--press-color', color);
       });
     }
 
@@ -177,6 +210,25 @@
         }
       };
       window.requestAnimationFrame(step);
+    }
+
+    // Function to get color for a given speed
+    function getColorForSpeed(speed) {
+      if (speed <= 0) {
+        return '#ff0000'; // Red
+      } else if (speed >= 300) {
+        return '#00ff00'; // Green
+      } else if (speed <= 150) {
+        const red = 255;
+        const green = Math.floor((speed / 150) * 255);
+        const blue = 0;
+        return `rgb(${red}, ${green}, ${blue})`;
+      } else {
+        const red = Math.floor((1 - (speed - 150) / 150) * 255);
+        const green = 255;
+        const blue = 0;
+        return `rgb(${red}, ${green}, ${blue})`;
+      }
     }
 
     // Fetch initial data
