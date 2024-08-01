@@ -11,47 +11,43 @@
       margin: 0;
       padding: 0;
       height: 100%;
+      width: 100%;
       display: flex;
-      flex-direction: column;
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
       justify-content: center;
       align-items: center;
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
     }
     .dashboard {
       display: flex;
+      flex-wrap: wrap;
       justify-content: center;
       align-items: center;
-      flex-wrap: nowrap;
       width: 100%;
-      overflow: hidden;
-      padding: 20px;
+      height: 100%;
+      padding: 10px;
       box-sizing: border-box;
     }
     .press-speed {
       background-color: var(--press-color, #fff);
       border-radius: 8px;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      margin: 0 10px;
+      margin: 5px;
       padding: 20px;
       text-align: center;
-      flex: 1;
-      min-width: 150px;
-      max-width: 250px;
+      flex: 0 1 calc(33.33% - 20px); /* Three boxes per row */
       box-sizing: border-box;
-      position: relative;
       transition: background-color 0.5s;
     }
     .press-name {
-      font-size: 1.5vw;
+      font-size: 4vw;
       font-weight: bold;
       color: #333;
       margin-bottom: 1vh;
-      position: relative;
-      z-index: 1;
+      word-wrap: break-word;
     }
     .speed-value {
-      font-size: 2vw;
+      font-size: 5vw;
       font-weight: bold;
       color: #333;
       animation: fadeIn 0.5s;
@@ -59,39 +55,6 @@
     @keyframes fadeIn {
       from { opacity: 0; }
       to { opacity: 1; }
-    }
-    .fire-container {
-      position: absolute;
-      top: -30px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: none;
-    }
-    .flame {
-      animation: burnBabyBurn 0.4s linear infinite;
-      height: 1px;
-      transform: scale(5) translate(-13px, -15px);
-      width: 1px;
-    }
-    .glow {
-      background-color: #ffb778;
-      border-radius: 50%;
-      filter: blur(100px);
-      height: 280px;
-      opacity: 0.5;
-      width: 280px;
-    }
-    .flame, .glow {
-      bottom: 0;
-      left: 0;
-      margin: auto;
-      pointer-events: none;
-      position: absolute;
-      right: 0;
-      top: 0;
-    }
-    @keyframes burnBabyBurn {
-      /* (Insert your keyframe animation code here) */
     }
   </style>
 </head>
@@ -159,10 +122,6 @@
           pressDiv.innerHTML = `
             <div class="press-name" id="name-${pressId}">${pressData.name}</div>
             <div class="speed-value" id="speed-${pressId}">${pressData.speed}</div>
-            <div class="fire-container" id="fire-${pressId}">
-              <div class="flame"></div>
-              <div class="glow"></div>
-            </div>
           `;
           dashboard.appendChild(pressDiv);
         }
@@ -178,19 +137,6 @@
 
         // Update previous speed
         previousSpeeds[pressData.name] = pressData.speed;
-
-        // Adjust fire animation based on speed
-        const fireContainer = document.getElementById(`fire-${pressId}`);
-        const flame = fireContainer.querySelector('.flame');
-        const glow = fireContainer.querySelector('.glow');
-        if (pressData.speed > 0) {
-          fireContainer.style.display = 'block';
-          const scale = Math.min(1 + pressData.speed / 100, 2); // Limit max scale
-          flame.style.setProperty('transform', `scale(${scale}) translate(-13px, -15px)`);
-          glow.style.setProperty('opacity', scale * 0.1);
-        } else {
-          fireContainer.style.display = 'none';
-        }
 
         // Update the background color based on speed
         const color = getColorForSpeed(pressData.speed);
